@@ -4,7 +4,6 @@
 import sys
 import xml.etree.ElementTree as ET
 import xmltodict
-from pprint import pprint
 import json
 
 # Makes sure all lists in the dictionary are sorted, at all levels of depth
@@ -22,18 +21,23 @@ def sort_dict(d):
   return d
 
 
+
 def compare_xml_files(xmlfile1, xmlfile2):
-  # Parse file into ElementTree objects
-  xmltree1 = ET.parse(xmlfile1)
-  xmltree2 = ET.parse(xmlfile2)
+  # Parse files
+  xmlstr1 = open(xmlfile1, 'r').read()
+  xmlstr2 = open(xmlfile2, 'r').read()
 
-  # Turn ElementTree objects into OrderedDicts (OrderedDicts are a bad output type, but this is the best library I found)
-  xmldict1 = xmltodict.parse(ET.tostring(xmltree1.getroot()), process_namespaces=True)
-  xmldict2 = xmltodict.parse(ET.tostring(xmltree2.getroot()), process_namespaces=True)
+  # Turn the strings into dicts
+  xmldict1 = json.loads(json.dumps(xmltodict.parse(xmlstr1, process_namespaces=True)))
+  xmldict2 = json.loads(json.dumps(xmltodict.parse(xmlstr2, process_namespaces=True)))
 
-  # Turn the OrderedDicts into regular dicts and sort them for comparison
-  xmldict1 = sort_dict(dict(json.loads(json.dumps(xmldict1))))
-  xmldict2 = sort_dict(dict(json.loads(json.dumps(xmldict2))))
+  # Sort the dictionaries for comparison
+  xmldict1 = sort_dict(xmldict1)
+  xmldict2 = sort_dict(xmldict2)
 
   # Compare the two dictionaries
   return(xmldict1 == xmldict2)
+
+
+if __name__ == "__main__":
+  print(compare_xml_files(sys.argv[1], sys.argv[2]))
